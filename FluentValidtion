@@ -1,0 +1,85 @@
+Customer.cs
+
+namespace FluentValidationAPP.Models
+{
+    public class Customer
+    {
+        public int CustomerID { get; set ; }
+        public string CustomerName { get; set ; }
+        public string Email { get; set ; }
+        public string Address { get; set ; }
+        public string Postcode { get; set ; }
+        public float ? Discount { get; set ; }
+        public bool HasDiscount { get; set ; }
+    }
+}
+
+CustomerValidator.cs
+
+using FluentValidation;
+namespace FluentValidationAPP.Models
+{
+    public class CustomerValidator : AbstractValidator< Customer >
+    {
+        public CustomerValidator()
+        {
+            RuleFor(customer => customer.CustomerName).NotNull().WithMessage( "客户名称不能为空" );
+            RuleFor(customer => customer.Email)
+                .NotEmpty().WithMessage( "邮箱不能为空" )
+                .EmailAddress().WithMessage( "邮箱格式不正确" );
+            RuleFor(customer => customer.Discount)
+                .NotEqual(0)
+                .When(customer => customer.HasDiscount);
+            RuleFor(customer => customer.Address)
+                .NotEmpty()
+                .WithMessage( "地址不能为空" )
+                .Length(20, 50)
+                .WithMessage( "地址长度范围为20-50字节" );
+        }
+    }
+}
+
+
+CustomerController.cs
+
+namespace FluentValidationAPP.Controllers
+{
+    public class CustomerController : Controller
+    {
+        //FluentValidation验证更多：
+        //http://fluentvalidation.codeplex.com/
+        //http://www.cnblogs.com/libingql/p/3801704.html
+        // GET: /Customer/
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [ HttpPost ]
+        public ActionResult Create( Customer customer)
+        {
+            CustomerValidator validator = new CustomerValidator();
+            ValidationResult result = validator.Validate(customer);
+
+            if (!result.IsValid)
+            {
+                result.Errors.ToList().ForEach(error =>
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                });
+            }
+
+            if (ModelState.IsValid)
+            {
+                return RedirectToAction("Index" );
+            }
+
+            return View(customer);
+        }
+    }
+}
