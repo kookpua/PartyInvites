@@ -1,0 +1,38 @@
+﻿@model PartyInvites.Models.GuestResponse
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Thanks</title>
+</head>
+    <body>
+        @{
+            try
+            {
+                WebMail.SmtpServer = "";
+                WebMail.SmtpPort =587;
+            }
+            catch (Exception)
+            {
+  
+                throw;
+            }
+        }
+        <div>
+            <h1>ThankYou,@Model.Name</h1>
+            @if (Model.WillAttend == true)
+            {
+                @:It's great that you're comming!
+            }
+            else
+            {
+                @:Sorry.
+            }
+        </div>
+    </body>
+</html>
